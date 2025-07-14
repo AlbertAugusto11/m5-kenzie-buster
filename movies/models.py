@@ -24,3 +24,8 @@ class Movie(models.Model):
         on_delete=models.CASCADE,
         related_name="movies"
     )
+    users = models.ManyToManyField(
+        "users.User",
+        through="movies_orders.MovieOrder",
+        related_name="ordered_movies"
+    )

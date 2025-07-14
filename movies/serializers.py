@@ -11,12 +11,7 @@ class MovieSerializer(serializers.Serializer):
         default=RatingChoices.GENERAL_AUDIENCES
         )
     synopsis = serializers.CharField(required=False, default="")
-    added_by = serializers.EmailField(read_only=True)
-
-    def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        rep['added_by'] = instance.user.email
-        return rep
+    added_by = serializers.EmailField(source='user.email', read_only=True)
 
     def create(self, validated_data):
         user = self.context['request'].user

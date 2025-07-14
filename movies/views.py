@@ -12,7 +12,11 @@ class MovieViews(APIView):
 
     def get(self, request):
         movies = Movie.objects.all()
-        serializer = MovieSerializer(movies, many=True, context={'request': request})
+        serializer = MovieSerializer(
+            movies,
+            many=True,
+            context={'request': request}
+        )
 
         return Response(serializer.data, 200)
 
@@ -27,7 +31,7 @@ class MovieViews(APIView):
 
             return Response(MovieSerializer(movie).data, 201)
         else:
-            return Response(movie_serializer.errors)
+            return Response(movie_serializer.errors, 400)
 
 
 class MovieDetailsViews(APIView):
