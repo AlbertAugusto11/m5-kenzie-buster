@@ -15,12 +15,14 @@ class UserSerializer(serializers.Serializer):
     is_superuser = serializers.BooleanField(read_only=True)
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        user = self.instance
+        if User.objects.filter(email=value).exclude(pk=user.pk).exists():
             raise serializers.ValidationError("email already registered.")
         return value
 
     def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
+        user = self.instance
+        if User.objects.filter(username=value).exclude(pk=user.pk).exists():
             raise serializers.ValidationError("username already taken.")
         return value
 
@@ -29,6 +31,25 @@ class UserSerializer(serializers.Serializer):
             return User.objects.create_superuser(**validated_data)
         else:
             return User.objects.create_user(**validated_data)
+
+    def update(self, instance: User, validated_data: dict):
+        instance.username = validated_data.get("username", instance.username)
+
+        password = validated_data.get("password", None)
+        if password:
+            instance.set_password(password)
+
+        instance.first_name = validated_data.get("first_name", instance.first_name)
+        instance.last_name = validated_data.get("last_name", instance.last_name)
+        instance.email = validated_data.get("email", instance.email)
+        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
+
+        instance.is_employee = validated_data.get("is_employee", instance.is_employee)
+        if not instance.is_employee:
+            instance.is_superuser = False
+
+        instance.save()
+        return instance
 
 
 class CustomJWTSerializer(TokenObtainPairSerializer):
